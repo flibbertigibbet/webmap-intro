@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>Webmap-intro by flibbertigibbet</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Webmap-intro</h1>
+        <h2>Materials for introductory mapping presentation</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/flibbertigibbet/webmap-intro/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/flibbertigibbet/webmap-intro/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/flibbertigibbet/webmap-intro" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="welcome-to-web-maps" class="anchor" href="#welcome-to-web-maps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Welcome to Web Maps!</h1>
+
+<p>We will explore interactive map-making for the web.</p>
+
+<p>Not a coder? Not a problem! We will start out by creating a map on <a href="https://cartodb.com/">CartoDB</a>, which you can do with a free account and without knowing how to code.</p>
+
+<p>Want to see some code? Sure thing! We will get to that, too.</p>
+
+<h2>
+<a id="whats-covered" class="anchor" href="#whats-covered" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What's covered:</h2>
+
+<ul>
+<li>Import a dataset of Philadelphia parks to CartoDB</li>
+<li>Try out some spatial queries for data analysis:
+
+<ul>
+<li>How many parks are within half of a mile of City Hall?</li>
+<li>What ten parks are closest to City Hall, and how far away are they?</li>
+</ul>
+</li>
+<li>Make a web page that loads your CartoDB visualization</li>
+<li>Make a web page with a <a href="http://leafletjs.com/">Leaflet</a> map</li>
+<li>Load a <a href="http://geojson.org/">GeoJSON</a> file into a Leaflet map</li>
+</ul>
+
+<h2>
+<a id="whats-needed" class="anchor" href="#whats-needed" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What's needed:</h2>
+
+<p>To follow along with the CartoDB portion, you will want to create a free account. Here is <a href="https://banderkat.cartodb.com/viz/d0d757ec-0ff8-11e6-9c80-0e8c56e2ffdb/public_map">an example</a> of what a simple map of the parks dataset looks like once it has been imported and shared as a public visualization.</p>
+
+<h2>
+<a id="fun-with-cartodb" class="anchor" href="#fun-with-cartodb" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Fun with CartoDB</h2>
+
+<p>We will play with a dataset of Philadelpia park boundaries, which you can download from PASDA here (426 kB). Import it into your CartoDB account and create a map from it.</p>
+
+<p>You may want to rename your dataset after it finishes importing to something easier to type. I named mine <code>philly_parks</code>.</p>
+
+<h2>
+<a id="querying-postgis" class="anchor" href="#querying-postgis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Querying PostGIS</h2>
+
+<p>CartoDB uses PostGIS geospatial extensions to a PostgreSQL database created for your account, and provides an interface for viewing what's in the database. We're going to try out some PostGIS queries.</p>
+
+<p>Open the sliding pane to the right of the map view. The SQL tab is towards the top. Here we can write custom queries and try them out.</p>
+
+<p>We want to search for parks around City Hall, so first let's draw a circle around City Hall with a half-mile radius. Plug this into the SQL pane and click 'Apply':</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> ST_Buffer(
+ ST_Transform(
+   ST_SetSRID(
+     ST_Point(<span class="pl-k">-</span><span class="pl-c1">75</span>.<span class="pl-c1">163431</span>,<span class="pl-c1">39</span>.<span class="pl-c1">952707</span>),
+     <span class="pl-c1">4326</span>),
+   <span class="pl-c1">3857</span>),
+  <span class="pl-c1">0</span>.<span class="pl-c1">5</span> <span class="pl-k">*</span> <span class="pl-c1">1609</span>) <span class="pl-k">as</span> the_geom_webmercator</pre></div>
+
+<p>So what does that do? The query creates a point at City Hall with <code>ST_Point</code>, then <code>ST_Buffer</code> creates a buffer around it, in meters; that's the radius of the circle drawn. <code>ST_Transform</code> and <code>ST_SetSRID</code> deal with map projections. For more information on buffering and distances, CartoDB has a tutorial <a href="http://academy.cartodb.com/courses/sql-postgis/postgis-in-cartodb/">here</a>.</p>
+
+<p>A yellow banner pops up at the top of the map; click the link in it to 'create dataset from query'. Now we can have our circle around City Hall saved to easily put on other maps. I named my new dataset <code>city_hall_half_mile</code>.</p>
+
+<p>Create a new map with both datasets. (You can also add a layer to an existing map instead). Change the polygon fill color for one of the layers, so they are easier to tell apart. Now, let's filter the parks to only show the ones within two miles of City Hall by putting this query into the SQL pane:</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> philly_parks.<span class="pl-k">*</span> <span class="pl-k">FROM</span> philly_parks,
+city_hall_half_mile
+<span class="pl-k">WHERE</span> ST_DWithin(
+  <span class="pl-c1">city_hall_half_mile</span>.<span class="pl-c1">the_geom_webmercator</span>,
+  <span class="pl-c1">philly_parks</span>.<span class="pl-c1">the_geom_webmercator</span>,
+  <span class="pl-c1">1</span>.<span class="pl-c1">5</span> <span class="pl-k">*</span> <span class="pl-c1">1609</span>)</pre></div>
+
+<p><code>ST_DWithin</code> filters the second geometry based on its distance in meters from the first geometry.</p>
+
+<p>So which parks lie at least in part within the half-mile circle?</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> philly_parks.<span class="pl-k">*</span> <span class="pl-k">FROM</span> philly_parks,
+city_hall_half_mile
+<span class="pl-k">WHERE</span> ST_Intersects(
+  <span class="pl-c1">city_hall_half_mile</span>.<span class="pl-c1">the_geom_webmercator</span>,
+  <span class="pl-c1">philly_parks</span>.<span class="pl-c1">the_geom_webmercator</span>)</pre></div>
+
+<p>And which parks are fully inside the circle?</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> philly_parks.<span class="pl-k">*</span> <span class="pl-k">FROM</span> philly_parks,
+city_hall_half_mile
+<span class="pl-k">WHERE</span> ST_Contains(
+  <span class="pl-c1">city_hall_half_mile</span>.<span class="pl-c1">the_geom_webmercator</span>,
+  <span class="pl-c1">philly_parks</span>.<span class="pl-c1">the_geom_webmercator</span>)</pre></div>
+
+<p>Okay. What are the ten parks closest to City Hall, and how far away are each?</p>
+
+<div class="highlight highlight-source-sql"><pre><span class="pl-k">SELECT</span> ST_X(ST_Centroid(the_geom)) <span class="pl-k">as</span> longitude,
+  ST_Y(ST_Centroid(the_geom)) <span class="pl-k">as</span> latitude,
+  park, cartodb_id,
+  the_geom_webmercator,
+ST_Distance(the_geom::geography,
+  ST_PointFromText(<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>, <span class="pl-c1">4326</span>)::geography) <span class="pl-k">AS</span> distance
+<span class="pl-k">FROM</span> philly_parks
+<span class="pl-k">ORDER BY</span> the_geom <span class="pl-k">&lt;</span><span class="pl-k">-</span><span class="pl-k">&gt;</span> ST_PointFromText(<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>, <span class="pl-c1">4326</span>)
+<span class="pl-k">LIMIT</span> <span class="pl-c1">10</span></pre></div>
+
+<p>You can see the distances listed by going to the 'Data View', using the button at top. For more information on distance sorting, CartoDB has a tutorial <a href="http://docs.cartodb.com/tips-and-tricks/advanced-analysis/#sort-records-by-distance-to-a-point">here</a>.</p>
+
+<h2>
+<a id="making-a-web-page-that-loads-a-cartodb-visualization" class="anchor" href="#making-a-web-page-that-loads-a-cartodb-visualization" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Making a web page that loads a CartoDB visualization</h2>
+
+<p>If you click the 'Publish' button in the upper right corner of a map, you get a shareable link, a snippet of code for embedding the map, and a third option that we're going to explore now, which is to load your map using CartoDB.js.</p>
+
+<p>Copy the link in the CartoDB.js section to your map's <code>viz.json</code>. We will use that later. If you follow the 'Read more' link above it, it will take you to the CartoDB.js tutorials. Let's start with their source for the 'Getting Started' tutorial, and modify it to load our visualization. Copy the example code from <a href="https://raw.githubusercontent.com/CartoDB/cartodb.js/develop/examples/easy.html">here</a> into a text editor.</p>
+
+<p>Change the link to the <code>viz.json</code> to reference the one for your map. Set the center to be on City Hall, and change the zoom level to zoom in on Philly:</p>
+
+<div class="highlight highlight-source-js"><pre>center_lat<span class="pl-k">:</span> <span class="pl-c1">39.952707</span>,
+center_lon<span class="pl-k">:</span> <span class="pl-k">-</span><span class="pl-c1">75.163431</span>,
+zoom<span class="pl-k">:</span> <span class="pl-c1">15</span></pre></div>
+
+<p>Now if you open the HTML file in a browser, you should see your map. You can see what mine looks like <a href="parks_near_city_hall.html">here</a>.</p>
+
+<p>CartoDB.js uses the Leaflet JavaScript library for displaying web maps. Next we're going to try out Leaflet directly.</p>
+
+<h2>
+<a id="leaflet" class="anchor" href="#leaflet" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Leaflet</h2>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
