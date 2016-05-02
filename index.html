@@ -6,6 +6,7 @@
 
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
     <title>Webmap-intro by flibbertigibbet</title>
   </head>
@@ -120,9 +121,11 @@ city_hall_half_mile
   park, cartodb_id,
   the_geom_webmercator,
 ST_Distance(the_geom::geography,
-  ST_PointFromText(<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>, <span class="pl-c1">4326</span>)::geography) <span class="pl-k">AS</span> distance
+  ST_PointFromText(<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>,
+  <span class="pl-c1">4326</span>)::geography) <span class="pl-k">AS</span> distance
 <span class="pl-k">FROM</span> philly_parks
-<span class="pl-k">ORDER BY</span> the_geom <span class="pl-k">&lt;</span><span class="pl-k">-</span><span class="pl-k">&gt;</span> ST_PointFromText(<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>, <span class="pl-c1">4326</span>)
+<span class="pl-k">ORDER BY</span> the_geom <span class="pl-k">&lt;</span><span class="pl-k">-</span><span class="pl-k">&gt;</span> ST_PointFromText(
+<span class="pl-s"><span class="pl-pds">'</span>POINT(-75.163431 39.952707)<span class="pl-pds">'</span></span>, <span class="pl-c1">4326</span>)
 <span class="pl-k">LIMIT</span> <span class="pl-c1">10</span></pre></div>
 
 <p>You can see the distances listed by going to the 'Data View', using the button at top. For more information on distance sorting, CartoDB has a tutorial <a href="http://docs.cartodb.com/tips-and-tricks/advanced-analysis/#sort-records-by-distance-to-a-point">here</a>.</p>
