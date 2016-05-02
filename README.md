@@ -89,9 +89,11 @@ SELECT ST_X(ST_Centroid(the_geom)) as longitude,
   park, cartodb_id,
   the_geom_webmercator,
 ST_Distance(the_geom::geography,
-  ST_PointFromText('POINT(-75.163431 39.952707)', 4326)::geography) AS distance
+  ST_PointFromText('POINT(-75.163431 39.952707)',
+  4326)::geography) AS distance
 FROM philly_parks
-ORDER BY the_geom <-> ST_PointFromText('POINT(-75.163431 39.952707)', 4326)
+ORDER BY the_geom <-> ST_PointFromText(
+'POINT(-75.163431 39.952707)', 4326)
 LIMIT 10
 ```
 
