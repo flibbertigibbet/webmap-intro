@@ -119,4 +119,8 @@ CartoDB.js uses the Leaflet JavaScript library for displaying web maps. Next we'
 
 ## Leaflet
 
-Leaflet has a great tutorial on loading GeoJSON [over here](http://leafletjs.com/examples/geojson.html).
+Leaflet has a tutorial on loading GeoJSON [over here](http://leafletjs.com/examples/geojson.html).
+
+Let's make a map of the Farmer's Markets in Philadelphia, using [the GeoJSON dataset from OpenDataPhilly](https://www.opendataphilly.org/dataset/farmers-markets-locations/resource/bbfd42c1-6a17-411b-9e04-8219551a53d4).
+
+Here's the [demo](http://flibbertigibbet.github.io/webmap-intro/farmers_markets.html) and the [source](https://github.com/flibbertigibbet/webmap-intro/blob/master/farmers_markets.html).
