@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Farmer's Markets</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <style>
+      html, body, #map {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+    <script>
+    // center on City Hall
+    var map = L.map('map').setView([39.952707, -75.163431], 15);
+
+    // use higher resolution map tiles on retina devices
+    var retina = '';
+    if (window.devicePixelRatio > 1) {
+        retina = '@2x';
+    }
+
+    // add base layer
+    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}' + retina + '.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+        '&copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+    }).addTo(map);
+
+    function makePopups(feature, layer) {
+      var popupContent = ['<h3>' + feature.properties.NAME + '</h3>',
+                          '<p>' + feature.properties.ADDRESS + '<br />',
+                          feature.properties.TIME + ' ' + feature.properties.DAY + '<br />',
+                          feature.properties.MONTHS + '</p>'
+                          ].join('');
+      if (feature.properties.ACCEPT_SNAP_ACCESS == 'Y') {
+        popupContent += '<p>Accepts food stamps.</p>';
+      }
+
+      layer.bindPopup(popupContent);
+    }
+
+    $.ajax({
+      url: 'http://data.phl.opendata.arcgis.com/datasets/0707c1f31e2446e881d680b0a5ee54bc_0.geojson',
+      dataType: 'json',
+      crossDomain: true,
+      success: function(json) {
+        // add the GeoJSON layer
+        L.geoJson([json], {
+          pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, {
+              radius: 5,
+              fillColor: "blue",
+              color: "blue",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
+            });
+          },
+          onEachFeature: makePopups
+        }).addTo(map);
+      }, error: function(error) {
+        console.error('Hm, something went wrong.');
+        console.error(error);
+      }
+    });
+
+    </script>
+  </body>
+</html>
+
