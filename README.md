@@ -119,4 +119,4 @@ CartoDB.js uses the Leaflet JavaScript library for displaying web maps. Next we'
 
 ## Leaflet
 
-
+Leaflet has a great tutorial on loading GeoJSON [over here](http://leafletjs.com/examples/geojson.html).
